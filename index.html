@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CADC Transportation Referral Map</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="site-header">
+      <img class="brand-logo" src="f74d03_3f9b3d6d8d05406592b51c24b16884ce~mv2.png" alt="Central Arkansas Development Council logo" />
+      <div>
+        <p class="eyebrow">Central Arkansas Development Council</p>
+        <h1>Transportation Referral Map</h1>
+      </div>
+      <div class="header-actions">
+        <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true"></span>
+          <span class="theme-text">Dark mode</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="map-section" aria-labelledby="mapTitle">
+      <div class="map-heading">
+        <div>
+          
+        </div>
+        <div class="legend" aria-label="Map legend">
+          <span><i class="legend-home"></i>Home county</span>
+          <span><i class="legend-eligible"></i>No referral</span>
+          <span><i class="legend-service"></i>Service county</span>
+          <span><i class="legend-border"></i>Possible if within 50 miles</span>
+        </div>
+      </div>
+
+      <div class="map-layout">
+        <div class="map-frame">
+          <div class="map-controls" aria-label="Map zoom controls">
+            <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
+            <button id="zoomOut" type="button" aria-label="Zoom out">-</button>
+            <button id="zoomReset" type="button">Reset</button>
+          </div>
+          <svg id="arkansasMap" role="img" aria-label="Arkansas county referral map"></svg>
+        </div>
+        <aside class="map-details">
+          <h3 id="mapSummary">Choose a service county</h3>
+          <p id="mapDescription">The map will show the counties that can be reached without a referral.</p>
+          <div id="eligibleCounties" class="county-list" aria-live="polite"></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="map-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
