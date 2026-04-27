@@ -12,6 +12,7 @@ A simple local web app for Central Arkansas Development Council to visualize whe
 - Trips to counties outside the highlighted/listed area require a referral.
 - Out-of-state border counties are included as possible destinations only when crossing into that county still keeps the trip within the two-county range and the destination address is within 50 miles.
 - County adjacency uses a one-mile minimum shared boundary so tiny corner or river-point contacts do not count.
+- Approved exceptions are layered on top of the two-county rule and shown separately in the destination list.
 - Other out-of-state trips still need manual review because they must be within 50 miles and are outside the Arkansas county-distance map.
 
 ## Configure the app

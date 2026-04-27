@@ -514,6 +514,19 @@ body.dark-mode .service-region-border {
   border-color: var(--border-chip-border);
 }
 
+.exception-group span {
+  background: #fff7ed;
+  color: #7c2d12;
+  border-color: #fdba74;
+  font-weight: 800;
+}
+
+body.dark-mode .exception-group span {
+  background: #3b2414;
+  color: #fed7aa;
+  border-color: #c2410c;
+}
+
 @media (max-width: 900px) {
   .container {
     padding: 16px;

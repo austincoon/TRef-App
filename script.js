@@ -137,6 +137,18 @@ const borderCountyNeighbors = {
   "West Carroll, LA": ["Chicot"]
 };
 
+const noReferralExceptions = {
+  Clark: ["Miller"],
+  Columbia: ["Bowie, TX"],
+  Hempstead: ["Garland", "Hot Spring"],
+  Howard: ["Bowie, TX", "Garland"],
+  "Little River": ["Clark"],
+  Nevada: ["Bowie, TX", "Garland"],
+  Ouachita: ["Garland"],
+  Pike: ["Bowie, TX", "Saline"],
+  Sevier: ["Clark"]
+};
+
 const arkansasCounties = Object.keys(countyNeighbors).sort((a, b) => a.localeCompare(b));
 
 const map = document.getElementById("arkansasMap");
@@ -200,22 +212,70 @@ function findShortestCountyPath(start, end) {
 }
 
 function getNoReferralCounties(homeCounty) {
-  return arkansasCounties.filter((county) => {
+  const ruleBasedCounties = arkansasCounties.filter((county) => {
     const path = findShortestCountyPath(homeCounty, county);
     return path && path.length - 1 <= 2;
   });
+  const arkansasExceptionCounties = getNoReferralExceptions(homeCounty)
+    .filter((county) => arkansasCounties.includes(county));
+
+  return [...new Set([...ruleBasedCounties, ...arkansasExceptionCounties])]
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function getNoReferralExceptions(homeCounty) {
+  return noReferralExceptions[homeCounty] || [];
 }
 
 function getNoReferralGroups(homeCounty) {
   return getNoReferralCounties(homeCounty).reduce((groups, county) => {
     const path = findShortestCountyPath(homeCounty, county);
-    const distance = path.length - 1;
-    groups[distance].push(county);
+    const distance = path ? path.length - 1 : null;
+
+    if (distance != null && distance <= 2) {
+      groups[distance].push(county);
+    }
+
     return groups;
   }, { 0: [], 1: [], 2: [] });
 }
 
 function getPossibleBorderCounties(homeCounty) {
+  const borderExceptionSet = new Set(
+    getNoReferralExceptions(homeCounty).filter((county) => county.includes(","))
+  );
+
+  return (arkansasCountyMap.borderCounties || []).filter(({ name }) => {
+    if (borderExceptionSet.has(name)) {
+      return true;
+    }
+
+    const neighboringArkansasCounties = borderCountyNeighbors[name] || [];
+    return neighboringArkansasCounties.some((county) => {
+      const path = findShortestCountyPath(homeCounty, county);
+      return path && path.length - 1 <= 1;
+    });
+  });
+}
+
+function getVisibleNoReferralExceptions(homeCounty) {
+  const exceptionSet = new Set(getNoReferralExceptions(homeCounty));
+  const ruleBasedArkansasCounties = new Set(arkansasCounties.filter((county) => {
+    const path = findShortestCountyPath(homeCounty, county);
+    return path && path.length - 1 <= 2;
+  }));
+  const ruleBasedBorderCounties = new Set(getPossibleBorderCountiesWithoutExceptions(homeCounty).map(({ name }) => name));
+
+  return [...exceptionSet].filter((county) => {
+    if (arkansasCounties.includes(county)) {
+      return !ruleBasedArkansasCounties.has(county);
+    }
+
+    return !ruleBasedBorderCounties.has(county);
+  });
+}
+
+function getPossibleBorderCountiesWithoutExceptions(homeCounty) {
   return (arkansasCountyMap.borderCounties || []).filter(({ name }) => {
     const neighboringArkansasCounties = borderCountyNeighbors[name] || [];
     return neighboringArkansasCounties.some((county) => {
@@ -561,6 +621,7 @@ function updateMapForHomeCounty(homeCounty) {
   const eligibleSet = new Set(eligible);
   const possibleBorderCounties = getPossibleBorderCounties(homeCounty);
   const possibleBorderCountySet = new Set(possibleBorderCounties.map(({ name }) => name));
+  const visibleExceptions = getVisibleNoReferralExceptions(homeCounty);
 
   countyPathElements.forEach((countyElement, county) => {
     countyElement.classList.toggle("is-home", county === homeCounty);
@@ -591,6 +652,12 @@ function updateMapForHomeCounty(homeCounty) {
       <h4>2 counties away</h4>
       ${groups[2].map((county) => `<span>${county}</span>`).join("")}
     </div>
+    ${visibleExceptions.length ? `
+      <div class="county-group exception-group">
+        <h4>Approved exceptions</h4>
+        ${visibleExceptions.map((county) => `<span>${county}</span>`).join("")}
+      </div>
+    ` : ""}
     <div class="county-group border-group">
       <h4>Possible if within 50 miles</h4>
       <p>These out-of-state border counties still need the destination address checked against the 50-mile limit.</p>
