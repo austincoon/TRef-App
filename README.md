@@ -57,3 +57,7 @@ Your current home counties are:
 
 - Added QA rule updates for approved exceptions and referral-required overrides.
 - Improved map hover visibility, county border contrast, service-area outline, zoom/pan controls, and responsive layout.
+
+### Version 1.2b
+
+- Removed the vertical map scrollbar while keeping mouse wheel zoom and drag panning.

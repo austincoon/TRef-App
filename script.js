@@ -167,7 +167,6 @@ const themeText = themeToggle?.querySelector(".theme-text");
 const zoomInButton = document.getElementById("zoomIn");
 const zoomOutButton = document.getElementById("zoomOut");
 const zoomResetButton = document.getElementById("zoomReset");
-const mapPanY = document.getElementById("mapPanY");
 const countyPathElements = new Map();
 const countyLabelElements = new Map();
 let countyHoverLayer = null;
@@ -453,7 +452,6 @@ function parseViewBox(viewBox) {
 function setMapViewBox(viewBox) {
   currentViewBox = viewBox;
   map.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-  updateMapPanControls();
 }
 
 function clampMapViewBox(viewBox) {
@@ -504,29 +502,6 @@ function resetMapZoom() {
   }
 }
 
-function updateMapPanControls() {
-  if (!baseViewBox || !currentViewBox || !mapPanY) {
-    return;
-  }
-
-  const maxY = baseViewBox.height - currentViewBox.height;
-  const yValue = maxY <= 0 ? 0 : ((currentViewBox.y - baseViewBox.y) / maxY) * 1000;
-
-  mapPanY.value = String(Math.round(yValue));
-  mapPanY.disabled = maxY <= 0;
-}
-
-function panMapFromControls() {
-  if (!baseViewBox || !currentViewBox || !mapPanY) {
-    return;
-  }
-
-  const maxY = baseViewBox.height - currentViewBox.height;
-  const y = baseViewBox.y + (maxY * Number(mapPanY.value)) / 1000;
-
-  setMapViewBox(clampMapViewBox({ ...currentViewBox, y }));
-}
-
 function setupMapNavigation() {
   if (!map) {
     return;
@@ -535,7 +510,6 @@ function setupMapNavigation() {
   zoomInButton?.addEventListener("click", () => zoomMap(0.78));
   zoomOutButton?.addEventListener("click", () => zoomMap(1.28));
   zoomResetButton?.addEventListener("click", resetMapZoom);
-  mapPanY?.addEventListener("input", panMapFromControls);
 
   map.addEventListener("wheel", (event) => {
     event.preventDefault();
