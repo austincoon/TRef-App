@@ -50,3 +50,10 @@ Your current home counties are:
 
 - County neighbor data was derived from Arkansas GIS Office county boundary data.
 - This tool is meant to support screening decisions; keep your agency's current policy as the source of truth.
+
+## Change Notes
+
+### Version 1.2
+
+- Added QA rule updates for approved exceptions and referral-required overrides.
+- Improved map hover visibility, county border contrast, service-area outline, zoom/pan controls, and responsive layout.

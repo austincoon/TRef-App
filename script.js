@@ -140,6 +140,7 @@ const borderCountyNeighbors = {
 const noReferralExceptions = {
   Clark: ["Miller"],
   Columbia: ["Bowie, TX"],
+  Garland: ["Jefferson"],
   Hempstead: ["Garland", "Hot Spring"],
   Howard: ["Bowie, TX", "Garland"],
   "Little River": ["Clark"],
@@ -147,6 +148,12 @@ const noReferralExceptions = {
   Ouachita: ["Garland"],
   Pike: ["Bowie, TX", "Saline"],
   Sevier: ["Clark"]
+};
+
+const referralRequiredOverrides = {
+  Calhoun: ["Jefferson"],
+  Garland: ["Faulkner"],
+  Ouachita: ["Ashley"]
 };
 
 const arkansasCounties = Object.keys(countyNeighbors).sort((a, b) => a.localeCompare(b));
@@ -160,8 +167,10 @@ const themeText = themeToggle?.querySelector(".theme-text");
 const zoomInButton = document.getElementById("zoomIn");
 const zoomOutButton = document.getElementById("zoomOut");
 const zoomResetButton = document.getElementById("zoomReset");
+const mapPanY = document.getElementById("mapPanY");
 const countyPathElements = new Map();
 const countyLabelElements = new Map();
+let countyHoverLayer = null;
 const initialHomeCounty = serviceCounties[0];
 const savedTheme = localStorage.getItem("cadc-referral-theme");
 let baseViewBox = null;
@@ -212,12 +221,13 @@ function findShortestCountyPath(start, end) {
 }
 
 function getNoReferralCounties(homeCounty) {
+  const referralRequiredSet = new Set(referralRequiredOverrides[homeCounty] || []);
   const ruleBasedCounties = arkansasCounties.filter((county) => {
     const path = findShortestCountyPath(homeCounty, county);
-    return path && path.length - 1 <= 2;
+    return path && path.length - 1 <= 2 && !referralRequiredSet.has(county);
   });
   const arkansasExceptionCounties = getNoReferralExceptions(homeCounty)
-    .filter((county) => arkansasCounties.includes(county));
+    .filter((county) => arkansasCounties.includes(county) && !referralRequiredSet.has(county));
 
   return [...new Set([...ruleBasedCounties, ...arkansasExceptionCounties])]
     .sort((a, b) => a.localeCompare(b));
@@ -372,6 +382,31 @@ function drawServiceRegionBorder() {
   map.appendChild(borderLayer);
 }
 
+function drawCountyHoverOutline(countyName) {
+  if (!countyHoverLayer) {
+    return;
+  }
+
+  countyHoverLayer.innerHTML = "";
+
+  const county = arkansasCountyMap.counties.find(({ name }) => name === countyName);
+
+  if (!county) {
+    return;
+  }
+
+  const outline = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  outline.setAttribute("d", county.path);
+  outline.classList.add("county-hover-outline");
+  countyHoverLayer.appendChild(outline);
+}
+
+function clearCountyHoverOutline() {
+  if (countyHoverLayer) {
+    countyHoverLayer.innerHTML = "";
+  }
+}
+
 function createCountyLabel({ name, path, isBorderCounty }) {
   const { x, y } = getPathCenter(path);
   const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -418,6 +453,7 @@ function parseViewBox(viewBox) {
 function setMapViewBox(viewBox) {
   currentViewBox = viewBox;
   map.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+  updateMapPanControls();
 }
 
 function clampMapViewBox(viewBox) {
@@ -468,6 +504,29 @@ function resetMapZoom() {
   }
 }
 
+function updateMapPanControls() {
+  if (!baseViewBox || !currentViewBox || !mapPanY) {
+    return;
+  }
+
+  const maxY = baseViewBox.height - currentViewBox.height;
+  const yValue = maxY <= 0 ? 0 : ((currentViewBox.y - baseViewBox.y) / maxY) * 1000;
+
+  mapPanY.value = String(Math.round(yValue));
+  mapPanY.disabled = maxY <= 0;
+}
+
+function panMapFromControls() {
+  if (!baseViewBox || !currentViewBox || !mapPanY) {
+    return;
+  }
+
+  const maxY = baseViewBox.height - currentViewBox.height;
+  const y = baseViewBox.y + (maxY * Number(mapPanY.value)) / 1000;
+
+  setMapViewBox(clampMapViewBox({ ...currentViewBox, y }));
+}
+
 function setupMapNavigation() {
   if (!map) {
     return;
@@ -476,6 +535,7 @@ function setupMapNavigation() {
   zoomInButton?.addEventListener("click", () => zoomMap(0.78));
   zoomOutButton?.addEventListener("click", () => zoomMap(1.28));
   zoomResetButton?.addEventListener("click", resetMapZoom);
+  mapPanY?.addEventListener("input", panMapFromControls);
 
   map.addEventListener("wheel", (event) => {
     event.preventDefault();
@@ -557,6 +617,10 @@ function renderCountyShape({ name, path, isBorderCounty }) {
       county.setAttribute("tabindex", "0");
       county.setAttribute("role", "button");
       county.setAttribute("aria-label", `Select ${name} County as home county`);
+      county.addEventListener("pointerenter", () => drawCountyHoverOutline(name));
+      county.addEventListener("pointerleave", clearCountyHoverOutline);
+      county.addEventListener("focus", () => drawCountyHoverOutline(name));
+      county.addEventListener("blur", clearCountyHoverOutline);
       county.addEventListener("click", () => {
         if (suppressNextCountyClick) {
           suppressNextCountyClick = false;
@@ -604,6 +668,10 @@ function renderCountyMap() {
   arkansasCountyMap.counties
     .filter(({ name }) => serviceCounties.includes(name))
     .forEach(renderCountyShape);
+
+  countyHoverLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  countyHoverLayer.classList.add("county-hover-layer");
+  map.appendChild(countyHoverLayer);
 
   arkansasCountyMap.counties.forEach((county) => {
     const label = createCountyLabel(county);
