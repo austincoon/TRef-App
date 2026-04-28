@@ -516,7 +516,110 @@ function setupMapNavigation() {
     zoomMap(event.deltaY < 0 ? 0.88 : 1.14, event.clientX, event.clientY);
   }, { passive: false });
 
+  let touchState = null;
+  const getTouchDistance = (touches) => Math.hypot(
+    touches[0].clientX - touches[1].clientX,
+    touches[0].clientY - touches[1].clientY
+  );
+  const getTouchCenter = (touches) => ({
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2
+  });
+
+  map.addEventListener("touchstart", (event) => {
+    if (!currentViewBox) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      touchState = {
+        mode: "pan",
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startViewBox: { ...currentViewBox },
+        targetCounty: event.target?.dataset?.county,
+        hasMoved: false
+      };
+      map.classList.add("is-panning");
+    }
+
+    if (event.touches.length === 2) {
+      touchState = {
+        mode: "pinch",
+        startDistance: getTouchDistance(event.touches),
+        startViewBox: { ...currentViewBox },
+        center: getTouchCenter(event.touches)
+      };
+      map.classList.add("is-panning");
+    }
+  }, { passive: false });
+
+  map.addEventListener("touchmove", (event) => {
+    if (!touchState || !currentViewBox) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (touchState.mode === "pan" && event.touches.length === 1) {
+      const touch = event.touches[0];
+      const rect = map.getBoundingClientRect();
+      const dx = ((touch.clientX - touchState.startX) / rect.width) * touchState.startViewBox.width;
+      const dy = ((touch.clientY - touchState.startY) / rect.height) * touchState.startViewBox.height;
+
+      if (Math.abs(touch.clientX - touchState.startX) > 6 || Math.abs(touch.clientY - touchState.startY) > 6) {
+        touchState.hasMoved = true;
+      }
+
+      setMapViewBox(clampMapViewBox({
+        ...touchState.startViewBox,
+        x: touchState.startViewBox.x - dx,
+        y: touchState.startViewBox.y - dy
+      }));
+    }
+
+    if (touchState.mode === "pinch" && event.touches.length === 2) {
+      const distance = getTouchDistance(event.touches);
+      const scale = touchState.startDistance / distance;
+
+      setMapViewBox({ ...touchState.startViewBox });
+      zoomMap(scale, touchState.center.x, touchState.center.y);
+    }
+  }, { passive: false });
+
+  map.addEventListener("touchend", (event) => {
+    if (!touchState) {
+      return;
+    }
+
+    if (
+      event.touches.length === 0 &&
+      touchState.mode === "pan" &&
+      !touchState.hasMoved &&
+      serviceCounties.includes(touchState.targetCounty)
+    ) {
+      selectHomeCountyFromMap(touchState.targetCounty);
+    }
+
+    if (event.touches.length === 0) {
+      touchState = null;
+      map.classList.remove("is-panning");
+    }
+  }, { passive: false });
+
+  map.addEventListener("touchcancel", () => {
+    touchState = null;
+    map.classList.remove("is-panning");
+  });
+
   map.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
     if (event.button !== 0 || !currentViewBox) {
       return;
     }
@@ -534,6 +637,10 @@ function setupMapNavigation() {
   });
 
   map.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
     if (!panState || panState.pointerId !== event.pointerId) {
       return;
     }
@@ -554,6 +661,10 @@ function setupMapNavigation() {
   });
 
   map.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
     if (!panState || panState.pointerId !== event.pointerId) {
       return;
     }
