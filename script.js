@@ -167,34 +167,26 @@ const themeText = themeToggle?.querySelector(".theme-text");
 const zoomInButton = document.getElementById("zoomIn");
 const zoomOutButton = document.getElementById("zoomOut");
 const zoomResetButton = document.getElementById("zoomReset");
+const mapFullscreenButton = document.getElementById("mapFullscreen");
 const countyPathElements = new Map();
 const countyLabelElements = new Map();
 let countyHoverLayer = null;
+let selectedCountyLayer = null;
 const initialHomeCounty = serviceCounties[0];
 const savedTheme = localStorage.getItem("cadc-referral-theme");
 let baseViewBox = null;
 let currentViewBox = null;
 let panState = null;
 let suppressNextCountyClick = false;
-const compactLabelCounties = new Set([
-  "Bowie, TX",
-  "Cass, TX",
-  "Bossier, LA",
-  "Caddo, LA",
-  "Webster, LA",
-  "Union, LA",
-  "Morehouse, LA",
-  "East Carroll, LA",
-  "West Carroll, LA",
-  "Issaquena, MS",
-  "Coahoma, MS",
-  "Tunica, MS",
-  "DeSoto, MS",
-  "Shelby, TN",
-  "Tipton, TN",
-  "Dyer, TN",
-  "Lauderdale, TN"
-]);
+const countyLabelOffsets = {
+  "Bossier, LA": { x: 2, y: -18 },
+  "Caddo, LA": { x: -18, y: 16 },
+  Chicot: { x: 0, y: 12 },
+  Columbia: { x: 10, y: 12 },
+  Lafayette: { x: 12, y: -18 },
+  Miller: { x: 0, y: 16 },
+  Ouachita: { x: 0, y: -12 }
+};
 
 function findShortestCountyPath(start, end) {
   const queue = [[start]];
@@ -400,6 +392,25 @@ function drawCountyHoverOutline(countyName) {
   countyHoverLayer.appendChild(outline);
 }
 
+function drawSelectedCountyOutline(countyName) {
+  if (!selectedCountyLayer) {
+    return;
+  }
+
+  selectedCountyLayer.innerHTML = "";
+
+  const county = arkansasCountyMap.counties.find(({ name }) => name === countyName);
+
+  if (!county) {
+    return;
+  }
+
+  const outline = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  outline.setAttribute("d", county.path);
+  outline.classList.add("selected-county-outline");
+  selectedCountyLayer.appendChild(outline);
+}
+
 function clearCountyHoverOutline() {
   if (countyHoverLayer) {
     countyHoverLayer.innerHTML = "";
@@ -408,17 +419,14 @@ function clearCountyHoverOutline() {
 
 function createCountyLabel({ name, path, isBorderCounty }) {
   const { x, y } = getPathCenter(path);
+  const offset = countyLabelOffsets[name] || { x: 0, y: 0 };
   const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
   const words = name.split(" ");
 
-  label.setAttribute("x", x);
-  label.setAttribute("y", y);
+  label.setAttribute("x", x + offset.x);
+  label.setAttribute("y", y + offset.y);
   label.classList.add("county-label");
   label.dataset.county = name;
-
-  if (compactLabelCounties.has(name)) {
-    label.classList.add("is-compact-label");
-  }
 
   if (!serviceCounties.includes(name)) {
     label.classList.add("is-secondary-label");
@@ -435,7 +443,7 @@ function createCountyLabel({ name, path, isBorderCounty }) {
 
   words.forEach((word, index) => {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
-    line.setAttribute("x", x);
+    line.setAttribute("x", x + offset.x);
     line.setAttribute("dy", index === 0 ? "-0.35em" : "1.15em");
     line.textContent = word;
     label.appendChild(line);
@@ -479,13 +487,19 @@ function zoomMap(scale, clientX, clientY) {
     return;
   }
 
+  const minWidth = baseViewBox.width * 0.22;
+
+  if (scale < 1 && currentViewBox.width <= minWidth + 0.01) {
+    return;
+  }
+
   const rect = map.getBoundingClientRect();
   const focusX = clientX == null ? rect.left + rect.width / 2 : clientX;
   const focusY = clientY == null ? rect.top + rect.height / 2 : clientY;
   const svgX = currentViewBox.x + ((focusX - rect.left) / rect.width) * currentViewBox.width;
   const svgY = currentViewBox.y + ((focusY - rect.top) / rect.height) * currentViewBox.height;
-  const nextWidth = currentViewBox.width * scale;
-  const nextHeight = currentViewBox.height * scale;
+  const nextWidth = Math.max(minWidth, currentViewBox.width * scale);
+  const nextHeight = nextWidth * (baseViewBox.height / baseViewBox.width);
   const nextViewBox = {
     x: svgX - ((focusX - rect.left) / rect.width) * nextWidth,
     y: svgY - ((focusY - rect.top) / rect.height) * nextHeight,
@@ -502,6 +516,16 @@ function resetMapZoom() {
   }
 }
 
+function updateMapExpandButton() {
+  if (!mapFullscreenButton) {
+    return;
+  }
+
+  const mapFrame = map?.closest(".map-frame");
+  const isExpanded = mapFrame?.classList.contains("is-window-fullscreen");
+  mapFullscreenButton.textContent = isExpanded ? "Exit full screen" : "Full screen";
+}
+
 function setupMapNavigation() {
   if (!map) {
     return;
@@ -510,6 +534,12 @@ function setupMapNavigation() {
   zoomInButton?.addEventListener("click", () => zoomMap(0.78));
   zoomOutButton?.addEventListener("click", () => zoomMap(1.28));
   zoomResetButton?.addEventListener("click", resetMapZoom);
+  mapFullscreenButton?.addEventListener("click", () => {
+    const mapFrame = map.closest(".map-frame");
+    mapFrame.classList.toggle("is-window-fullscreen");
+    document.body.classList.toggle("map-is-expanded", mapFrame.classList.contains("is-window-fullscreen"));
+    updateMapExpandButton();
+  });
 
   map.addEventListener("wheel", (event) => {
     event.preventDefault();
@@ -754,6 +784,10 @@ function renderCountyMap() {
     .filter(({ name }) => serviceCounties.includes(name))
     .forEach(renderCountyShape);
 
+  selectedCountyLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  selectedCountyLayer.classList.add("selected-county-layer");
+  map.appendChild(selectedCountyLayer);
+
   countyHoverLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
   countyHoverLayer.classList.add("county-hover-layer");
   map.appendChild(countyHoverLayer);
@@ -781,6 +815,8 @@ function updateMapForHomeCounty(homeCounty) {
     countyElement.classList.toggle("is-eligible", eligibleSet.has(county) && county !== homeCounty);
     countyElement.classList.toggle("is-border-eligible", possibleBorderCountySet.has(county));
   });
+
+  drawSelectedCountyOutline(homeCounty);
 
   countyLabelElements.forEach((labelElement, county) => {
     labelElement.classList.toggle("is-eligible-label", eligibleSet.has(county) && county !== homeCounty);
