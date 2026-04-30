@@ -27,6 +27,7 @@
   --border: #bfd3ec;
   --text-muted: #52677f;
   --map-label: #52677f;
+  --map-secondary-label: #24364c;
   --map-label-stroke: rgba(255, 255, 255, 0.95);
   --eligible-label: #08265a;
   --eligible-label-stroke: rgba(255, 255, 255, 0.95);
@@ -59,6 +60,7 @@ body.dark-mode {
   --border: #28476b;
   --text-muted: #a9bdd5;
   --map-label: #dbeafe;
+  --map-secondary-label: #e7f1ff;
   --map-label-stroke: rgba(5, 16, 31, 0.95);
   --eligible-label: #031b3a;
   --eligible-label-stroke: rgba(226, 242, 255, 0.95);
@@ -447,7 +449,8 @@ body.dark-mode .county-hover-outline {
 }
 
 .county-label.is-secondary-label {
-  opacity: 0.28;
+  fill: var(--map-secondary-label);
+  opacity: 0.55;
 }
 
 .county-label.is-secondary-label.is-eligible-label,
