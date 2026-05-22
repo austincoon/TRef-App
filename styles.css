@@ -118,6 +118,14 @@ body {
   font-weight: 800;
 }
 
+.tref-button,
+.tref-button:link,
+.tref-button:visited,
+.tref-button:hover,
+.tref-button:active {
+  text-decoration: none;
+}
+
 .tref-button:hover {
   border-color: var(--blue-700);
 }
