@@ -102,6 +102,26 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.tref-button {
+  text-decoration: none !important;
+  padding: 0 14px;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--chip-bg);
+  color: var(--blue-800);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.tref-button:hover {
+  border-color: var(--blue-700);
+}
+
 .brand-logo {
   display: block;
   width: 96px;
