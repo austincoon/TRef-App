@@ -123,8 +123,13 @@ body {
 .tref-button:visited,
 .tref-button:hover,
 .tref-button:active {
-  text-decoration: none;
+  text-decoration: none !important;
 }
+
+a {
+  text-decoration: none !important;
+}
+
 
 .tref-button:hover {
   border-color: var(--blue-700);
