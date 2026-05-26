@@ -1,87 +1,144 @@
 :root {
   color-scheme: light;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* LIGHT MODE */
   --blue-900: #0b2f6b;
   --blue-800: #174a94;
   --blue-700: #245ca8;
   --blue-200: #cfe2ff;
   --blue-100: #eaf3ff;
   --blue-050: #f6faff;
+
   --page-bg: #dbe8f7;
   --surface: #ffffff;
+  --surface-secondary: #f6faff;
+
   --map-bg: #d8e4f2;
+
   --county-fill: #f8fbff;
   --county-stroke: #6f86a3;
+
   --service-fill: #dbeafe;
   --service-hover: #bfdbfe;
+
   --eligible-fill: #8fc5ff;
+
   --border-fill: #f8ead5;
   --border-stroke: #a97935;
   --border-eligible-fill: #fbbf24;
+
   --chip-bg: #f6faff;
   --chip-border: #b8d2ef;
   --chip-text: #18385f;
+
   --border-chip-bg: #f8fafc;
   --border-chip-text: #435469;
   --border-chip-border: #cbd5e1;
+
   --border: #bfd3ec;
+
+  --text-primary: #10233f;
   --text-muted: #52677f;
+
   --map-label: #52677f;
   --map-secondary-label: #24364c;
   --map-label-stroke: rgba(255, 255, 255, 0.95);
+
   --eligible-label: #08265a;
   --eligible-label-stroke: rgba(255, 255, 255, 0.95);
+
   --border-label: #684a13;
   --border-label-stroke: rgba(255, 250, 235, 0.95);
+
   --home-label-stroke: rgba(11, 47, 107, 0.88);
-  color: #10233f;
+
+  --shadow-sm: 0 2px 6px rgba(11, 47, 107, 0.08);
+  --shadow-md: 0 8px 20px rgba(11, 47, 107, 0.14);
+
+  color: var(--text-primary);
   background: var(--page-bg);
 }
 
 body.dark-mode {
   color-scheme: dark;
-  --page-bg: #081525;
-  --surface: #101d2f;
-  --map-bg: #152a44;
-  --county-fill: #233b59;
+
+  /* DARK MODE */
+  --page-bg: #07111f;
+  --surface: #101c2d;
+  --surface-secondary: #16263a;
+
+  --map-bg: #13253b;
+
+  --county-fill: #213752;
   --county-stroke: #8fb0d8;
-  --service-fill: #1e4f86;
-  --service-hover: #2f6db1;
+
+  --service-fill: #1d4f84;
+  --service-hover: #2d6bad;
+
   --eligible-fill: #4aa3ff;
-  --border-fill: #4d3f2b;
+
+  --border-fill: #4a3c28;
   --border-stroke: #d8ad64;
   --border-eligible-fill: #f59e0b;
-  --chip-bg: #172b45;
-  --chip-border: #2e5a89;
-  --chip-text: #d9ecff;
+
+  --chip-bg: #18293f;
+  --chip-border: #31547b;
+  --chip-text: #e7f1ff;
+
   --border-chip-bg: #2c251b;
   --border-chip-text: #ffe3b3;
   --border-chip-border: #7c5f32;
-  --border: #28476b;
-  --text-muted: #a9bdd5;
+
+  --border: #294868;
+
+  --text-primary: #eef6ff;
+  --text-muted: #b2c6de;
+
   --map-label: #dbeafe;
-  --map-secondary-label: #e7f1ff;
+  --map-secondary-label: #f1f7ff;
   --map-label-stroke: rgba(5, 16, 31, 0.95);
+
   --eligible-label: #031b3a;
   --eligible-label-stroke: rgba(226, 242, 255, 0.95);
+
   --border-label: #251702;
   --border-label-stroke: rgba(255, 236, 179, 0.95);
+
   --home-label-stroke: rgba(3, 12, 29, 0.92);
-  --blue-900: #d8ecff;
-  --blue-800: #a9d2ff;
-  --blue-700: #77b8ff;
-  color: #eef6ff;
+
+  --blue-900: #f2f7ff;
+  --blue-800: #d6e8ff;
+  --blue-700: #8fc4ff;
+  --blue-200: #27496f;
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.45);
+
+  color: var(--text-primary);
+  background: var(--page-bg);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   min-height: 100vh;
   background: var(--page-bg);
+  color: var(--text-primary);
   overflow-x: hidden;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .container {
@@ -91,6 +148,7 @@ body {
   padding: 18px 22px;
   background: var(--surface);
   overflow-x: hidden;
+  transition: background-color 180ms ease;
 }
 
 .site-header {
@@ -102,6 +160,11 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
 .tref-button {
   text-decoration: none !important;
   padding: 0 14px;
@@ -109,30 +172,28 @@ body {
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--chip-bg);
-  color: var(--blue-800);
+  color: var(--chip-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font: inherit;
   font-size: 0.95rem;
   font-weight: 800;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 120ms ease;
 }
-
-.tref-button,
-.tref-button:link,
-.tref-button:visited,
-.tref-button:hover,
-.tref-button:active {
-  text-decoration: none !important;
-}
-
-a {
-  text-decoration: none !important;
-}
-
 
 .tref-button:hover {
   border-color: var(--blue-700);
+  background: var(--surface-secondary);
+  transform: translateY(-1px);
+}
+
+body.dark-mode .tref-button:hover {
+  background: #223750;
 }
 
 .brand-logo {
@@ -158,15 +219,24 @@ a {
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--chip-bg);
-  color: var(--blue-800);
+  color: var(--chip-text);
   cursor: pointer;
   font: inherit;
   font-size: 0.9rem;
   font-weight: 800;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
 
 .theme-toggle:hover {
   border-color: var(--blue-700);
+  background: var(--surface-secondary);
+}
+
+body.dark-mode .theme-toggle:hover {
+  background: #223750;
 }
 
 .theme-icon {
@@ -188,7 +258,9 @@ a {
   border-radius: 50%;
   background: var(--surface);
   box-shadow: 0 1px 2px rgba(11, 47, 107, 0.24);
-  transition: transform 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
 }
 
 body.dark-mode .theme-icon {
@@ -197,7 +269,7 @@ body.dark-mode .theme-icon {
 
 body.dark-mode .theme-icon::after {
   transform: translateX(8px);
-  background: #eaf3ff;
+  background: #f6fbff;
 }
 
 .eyebrow {
@@ -205,15 +277,28 @@ body.dark-mode .theme-icon::after {
   color: var(--blue-700);
   font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0;
   text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--blue-900);
 }
 
 h1 {
   margin: 0 0 10px;
   font-size: 2rem;
   line-height: 1.1;
-  color: var(--blue-900);
+}
+
+h2 {
+  font-size: 1.45rem;
+}
+
+h3 {
+  font-size: 1.05rem;
 }
 
 p {
@@ -235,28 +320,9 @@ p {
   margin-bottom: 12px;
 }
 
-h2,
-h3 {
-  margin: 0;
-  color: var(--blue-900);
-  line-height: 1.2;
-}
-
-h2 {
-  font-size: 1.45rem;
-}
-
-h3 {
-  font-size: 1.05rem;
-}
-
 .map-heading p,
 .map-details p {
   margin: 8px 0 0;
-}
-
-.map-details > p:empty {
-  display: none;
 }
 
 .legend {
@@ -278,7 +344,7 @@ h3 {
 .legend i {
   width: 16px;
   height: 16px;
-  border: 1px solid #8caed5;
+  border: 1px solid var(--border);
   border-radius: 4px;
 }
 
@@ -306,6 +372,14 @@ h3 {
   min-height: calc(100vh - 172px);
 }
 
+.map-frame,
+.map-details {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
 .map-frame {
   position: relative;
   display: flex;
@@ -313,8 +387,6 @@ h3 {
   justify-content: center;
   min-height: calc(100vh - 172px);
   padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--map-bg);
   overflow: hidden;
 }
@@ -367,7 +439,8 @@ body.map-is-expanded {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow: 0 8px 20px rgba(11, 47, 107, 0.14);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
 }
 
 .map-controls button {
@@ -381,17 +454,29 @@ body.map-is-expanded {
   cursor: pointer;
   font: inherit;
   font-weight: 900;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
 
 .map-controls button:hover {
   border-color: var(--blue-700);
+  background: var(--surface-secondary);
+}
+
+body.dark-mode .map-controls button:hover {
+  background: #223750;
 }
 
 .county {
   fill: var(--county-fill);
   stroke: var(--county-stroke);
   stroke-width: 1.8;
-  transition: fill 160ms ease, opacity 160ms ease, stroke 160ms ease;
+  transition:
+    fill 160ms ease,
+    opacity 160ms ease,
+    stroke 160ms ease;
 }
 
 .service-county {
@@ -422,7 +507,9 @@ body.map-is-expanded {
   fill: var(--blue-900);
 }
 
-.service-region-border-layer {
+.service-region-border-layer,
+.county-hover-layer,
+.selected-county-layer {
   pointer-events: none;
 }
 
@@ -438,20 +525,16 @@ body.dark-mode .service-region-border {
   stroke: #f8fbff;
 }
 
-.county-hover-layer {
-  pointer-events: none;
-}
-
-.selected-county-layer {
-  pointer-events: none;
-}
-
 .selected-county-outline {
   fill: none;
   stroke: #000000;
   stroke-width: 3.5;
   stroke-linejoin: round;
   stroke-linecap: round;
+}
+
+body.dark-mode .selected-county-outline {
+  stroke: #ffffff;
 }
 
 .county-hover-outline {
@@ -478,18 +561,12 @@ body.dark-mode .county-hover-outline {
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: middle;
-  opacity: 0.72;
+  opacity: 0.78;
 }
 
 .county-label.is-secondary-label {
   fill: var(--map-secondary-label);
-  opacity: 0.55;
-}
-
-.county-label.is-secondary-label.is-eligible-label,
-.county-label.is-secondary-label.is-border-eligible-label,
-.county-label.is-secondary-label.is-home-label {
-  opacity: 1;
+  opacity: 0.58;
 }
 
 .county-label.is-border-label {
@@ -497,7 +574,6 @@ body.dark-mode .county-hover-outline {
   font-size: 8px;
   font-weight: 700;
   stroke: var(--border-label-stroke);
-  opacity: 0.7;
 }
 
 .county-label.is-border-eligible-label {
@@ -528,9 +604,6 @@ body.dark-mode .county-hover-outline {
   max-height: calc(100vh - 172px);
   overflow: hidden;
   padding: 18px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
 }
 
 .county-list {
@@ -554,7 +627,6 @@ body.dark-mode .county-hover-outline {
   color: var(--blue-700);
   font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -578,12 +650,20 @@ body.dark-mode .county-hover-outline {
   font-size: 0.85rem;
   line-height: 1.2;
   overflow-wrap: anywhere;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
 
 .county-list .home-chip {
   border-color: var(--blue-900);
   background: var(--blue-900);
-  color: #ffffff;
+  color: #081525;
+}
+
+body.dark-mode .county-list .home-chip {
+  color: #081525;
 }
 
 .border-group span {
@@ -615,13 +695,10 @@ body.dark-mode .exception-group span {
     min-height: auto;
   }
 
-  .map-frame {
-    min-height: auto;
-  }
-
+  .map-frame,
   .map-details {
-    max-height: none;
     min-height: auto;
+    max-height: none;
   }
 
   .county-list {
