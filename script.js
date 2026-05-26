@@ -865,7 +865,7 @@ function setTheme(theme) {
 
   if (themeToggle) {
     if (themeText) {
-      themeText.textContent = isDark ? "Light mode" : "Dark mode";
+      themeText.textContent = isDark ? "Dark mode" : "Dark mode";
     }
     themeToggle.setAttribute("aria-pressed", String(isDark));
   }
