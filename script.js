@@ -147,7 +147,7 @@ const noReferralExceptions = {
   Nevada: ["Bowie, TX", "Garland", "Sevier"],
   Ouachita: ["Garland"],
   Pike: ["Bowie, TX", "Saline"],
-  Sevier: ["Clark"]
+  Sevier: ["Clark", "Nevada"]
 };
 
 const referralRequiredOverrides = {
