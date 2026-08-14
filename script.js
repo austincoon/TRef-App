@@ -144,7 +144,7 @@ const noReferralExceptions = {
   Hempstead: ["Garland", "Hot Spring"],
   Howard: ["Bowie, TX", "Garland"],
   "Little River": ["Clark"],
-  Nevada: ["Bowie, TX", "Garland"],
+  Nevada: ["Bowie, TX", "Garland", "Sevier"],
   Ouachita: ["Garland"],
   Pike: ["Bowie, TX", "Saline"],
   Sevier: ["Clark"]
